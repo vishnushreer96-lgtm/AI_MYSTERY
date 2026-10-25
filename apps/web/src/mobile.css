@@ -1,0 +1,70 @@
+.mobile-tabs {
+  display: none;
+}
+.suspect-detail {
+  align-items: flex-start;
+}
+.suspect-detail > div:last-child {
+  min-width: 0;
+}
+.suspect-detail p {
+  font-size: 10px;
+  color: #aeb5ad;
+  line-height: 1.5;
+  margin: 6px 0;
+}
+.suspect-detail small {
+  line-height: 1.5;
+}
+.mobile-active {
+  display: block;
+}
+@media (max-width: 600px) {
+  .mobile-tabs {
+    display: flex;
+    gap: 4px;
+    padding: 10px 13px;
+    border-bottom: 1px solid var(--line);
+    position: sticky;
+    top: 0;
+    background: #111719;
+    z-index: 2;
+  }
+  .mobile-tabs button {
+    flex: 1;
+    border: 1px solid #343a38;
+    background: transparent;
+    color: #aeb4ab;
+    padding: 9px 3px;
+    font: 8px var(--mono);
+    letter-spacing: 0.04em;
+  }
+  .mobile-tabs button[aria-selected="true"] {
+    border-color: #9c8350;
+    color: var(--amber);
+  }
+  .mobile-section {
+    display: none !important;
+  }
+  .sidebar {
+    display: contents;
+  }
+  .sidebar section.mobile-active {
+    display: block !important;
+    order: 1;
+  }
+  .sidebar section.mobile-active .suspect-detail {
+    padding: 12px 0;
+  }
+  .sidebar .hint-button,
+  .sidebar .hint-text {
+    order: 2;
+  }
+  .evidence-workspace.mobile-active {
+    display: block !important;
+    order: 0;
+  }
+  .dashboard {
+    gap: 12px;
+  }
+}
