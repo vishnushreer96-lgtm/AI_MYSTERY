@@ -15,6 +15,7 @@ import { generateValidated, generator } from "./services/generation.js";
 import { caseDto, evidenceDto, revealDto } from "./utils/dto.js";
 
 export const app = express();
+app.set("trust proxy", 1);
 app.disable("x-powered-by");
 app.use((req, res, next) => {
   const id = randomUUID();
