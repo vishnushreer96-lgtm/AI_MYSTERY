@@ -423,9 +423,18 @@ export async function generateValidated(
       };
       validateConsistency(game, input.length);
       return { game, attempts: attempt + 1 };
-    } catch (e) {
-      last = e;
-    }
+   } catch (e) {
+  last = e;
+
+  console.error("[Gemini Generation Error]", {
+    attempt: attempt + 1,
+    message: e instanceof Error ? e.message : String(e),
+    status:
+      typeof e === "object" && e !== null && "status" in e
+        ? (e as { status?: unknown }).status
+        : undefined,
+  });
+}
   }
   if (
     last instanceof Error &&
