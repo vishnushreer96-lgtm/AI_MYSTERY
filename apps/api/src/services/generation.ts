@@ -423,12 +423,14 @@ export async function generateValidated(
       };
       validateConsistency(game, input.length);
       return { game, attempts: attempt + 1 };
-   }   catch (e) {
+   
+    } catch (e) {
       last = e;
 
       const errorMessage =
         e instanceof Error ? e.message : String(e);
 
+      // Detect Gemini daily quota exhaustion
       if (
         errorMessage.includes("RESOURCE_EXHAUSTED") ||
         errorMessage.includes('"code":429') ||
@@ -437,8 +439,18 @@ export async function generateValidated(
         throw new Error("AI_QUOTA_EXCEEDED");
       }
 
+      // Detect temporary Gemini service overload
+      if (
+        errorMessage.includes('"code":503') ||
+        errorMessage.includes("UNAVAILABLE") ||
+        /high demand/i.test(errorMessage)
+      ) {
+        throw new Error("AI_TEMPORARILY_UNAVAILABLE");
+      }
+
       console.error("[Gemini Generation Error]", errorMessage);
     }
+
   }
   if (
     last instanceof Error &&

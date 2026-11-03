@@ -138,6 +138,15 @@ app.post(
       "AI_QUOTA_EXCEEDED",
       "Daily AI generation limit reached. Please try again after your quota resets.",
       );
+      
+      if (message === "AI_TEMPORARILY_UNAVAILABLE")
+        return fail(
+          res,
+          503,
+          "AI_TEMPORARILY_UNAVAILABLE",
+          "Gemini is temporarily experiencing high demand. Please wait a moment and try again.",
+        );
+
       if (message === "AI_UNAVAILABLE")
         return fail(
           res,
