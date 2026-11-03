@@ -131,6 +131,13 @@ app.post(
       generated = await generateValidated(parsed.data);
     } catch (error) {
       const message = error instanceof Error ? error.message : "";
+      if (message === "AI_QUOTA_EXCEEDED")
+        return fail(
+        res,
+        429,
+      "AI_QUOTA_EXCEEDED",
+      "Daily AI generation limit reached. Please try again after your quota resets.",
+      );
       if (message === "AI_UNAVAILABLE")
         return fail(
           res,
