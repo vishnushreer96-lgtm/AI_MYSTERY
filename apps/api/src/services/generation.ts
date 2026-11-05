@@ -424,11 +424,43 @@ export async function generateValidated(
       validateConsistency(game, input.length);
       return { game, attempts: attempt + 1 };
    
+    
     } catch (e) {
+      // LOG THE ORIGINAL GEMINI ERROR
+      const err =
+        e instanceof Error ? e : new Error(String(e));
+
+      type ApiErrorDetails = {
+        status?: unknown;
+        code?: unknown;
+        response?: {
+        status?: unknown;
+        data?: unknown;
+        };
+      };
+
+      const apiError: ApiErrorDetails =
+        e !== null && typeof e === "object"
+          ? (e as ApiErrorDetails)
+          : {};
+
+      console.error("[GEMINI ORIGINAL ERROR]", {
+        name: err.name,
+        message: err.message,
+        status: apiError.status ?? apiError.response?.status,
+        code: apiError.code,
+        response: apiError.response?.data,
+        stack: err.stack,
+      });
+
       last = e;
 
       const errorMessage =
         e instanceof Error ? e.message : String(e);
+        // Preserve missing API configuration errors
+      if (errorMessage === "AI_UNAVAILABLE") {
+        throw new Error("AI_UNAVAILABLE");
+      }
 
       // Detect Gemini daily quota exhaustion
       if (
@@ -450,18 +482,21 @@ export async function generateValidated(
 
       console.error("[Gemini Generation Error]", errorMessage);
     }
-
   }
+
   if (
     last instanceof Error &&
     ["AI_UNAVAILABLE", "AI_TIMEOUT"].includes(last.message)
   )
     throw last;
+
   const status =
     typeof last === "object" && last !== null && "status" in last
       ? (last as { status?: unknown }).status
       : undefined;
+
   if (status === 429 || status === 503 || status === 502 || status === 500)
     throw new Error("AI_UNAVAILABLE");
+
   throw new Error("AI_INVALID_OUTPUT");
 }
