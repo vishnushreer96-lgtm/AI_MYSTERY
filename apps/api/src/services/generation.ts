@@ -455,28 +455,57 @@ export async function generateValidated(
 
       last = e;
 
-      const errorMessage =
-        e instanceof Error ? e.message : String(e);
-        // Preserve missing API configuration errors
-      if (errorMessage === "AI_UNAVAILABLE") {
-        throw new Error("AI_UNAVAILABLE");
+      const errorMessage = err.message;
+
+      // Do not retry configuration errors or timeouts here
+      if (
+        errorMessage === "AI_UNAVAILABLE" ||
+        errorMessage === "AI_TIMEOUT"
+      ) {
+        throw e;
       }
 
-      // Detect Gemini daily quota exhaustion
+      const statusCode = Number(
+        apiError.status ?? apiError.response?.status
+      );
+
+      // Detect quota exhaustion
       if (
+        statusCode === 429 ||
         errorMessage.includes("RESOURCE_EXHAUSTED") ||
-        errorMessage.includes('"code":429') ||
         /quota/i.test(errorMessage)
       ) {
         throw new Error("AI_QUOTA_EXCEEDED");
       }
 
       // Detect temporary Gemini service overload
-      if (
-        errorMessage.includes('"code":503') ||
-        errorMessage.includes("UNAVAILABLE") ||
-        /high demand/i.test(errorMessage)
-      ) {
+      const isTemporaryUnavailable =
+        statusCode === 503 ||
+        /"code"\s*:\s*503/.test(errorMessage) ||
+        /"status"\s*:\s*"UNAVAILABLE"/.test(errorMessage) ||
+        /high demand/i.test(errorMessage);
+
+      if (isTemporaryUnavailable) {
+        // Retry if attempts are still available
+        if (attempt < maxAttempts - 1) {
+          const delayMs = Math.min(
+            2000 * Math.pow(2, attempt),
+            10000
+          );
+
+          console.warn(
+            `[Gemini] 503 error. Retrying attempt ${
+              attempt + 2
+            }/${maxAttempts} in ${delayMs}ms`
+          );
+
+          await new Promise<void>((resolve) =>
+            setTimeout(resolve, delayMs)
+          );
+
+          continue;
+        }
+
         throw new Error("AI_TEMPORARILY_UNAVAILABLE");
       }
 
