@@ -13,7 +13,16 @@ Users can create mystery cases, examine evidence, investigate suspects, analyze 
 </p>
 
 > **Note:** All characters, events and evidence are fictional. Certain visual and CCTV evidence elements are simulated placeholders, not actual media recordings.
+## 📸 Project Screenshots
 
+### 1. Landing Page
+![AI Mystery Room Landing Page](./landing-page.png_page-0001.jpg)
+
+### 2. Investigation Dashboard
+![Investigation Dashboard](./investigation-dashboard-hq.png)
+
+### 3. Final Investigation Report
+![Final Investigation Report](./final-report.png_page-0001.jpg)
 ---
 
 ## ✨ Features
